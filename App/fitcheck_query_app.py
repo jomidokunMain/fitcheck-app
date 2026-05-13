@@ -154,41 +154,63 @@ JOIN_VIEWS = {
 
 @st.cache_resource
 def get_engine():
-    return create_engine(DB_URL)
+    try:
+        engine = create_engine(DB_URL)
+        # Test connection
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return engine
+    except Exception as e:
+        st.error(f"❌ Database connection failed: {e}\n\nPlease ensure the ETL pipeline has been run and Neon is populated.")
+        return None
 
 @st.cache_data(show_spinner=False)
 def get_columns(table_name: str) -> List[str]:
     engine = get_engine()
-    if table_name in JOIN_VIEWS:
-        sql = text(f"SELECT * FROM ({JOIN_VIEWS[table_name]}) q LIMIT 0")
-    else:
-        sql = text(f'SELECT * FROM "{table_name}" LIMIT 0')
-    with engine.connect() as conn:
-        df = pd.read_sql(sql, conn)
-    return list(df.columns)
+    if engine is None:
+        # Return fallback columns from TABLE_CONFIG
+        return TABLE_CONFIG.get(table_name, {}).get("default_columns", ["error: no data"])
+    
+    try:
+        if table_name in JOIN_VIEWS:
+            sql = text(f"SELECT * FROM ({JOIN_VIEWS[table_name]}) q LIMIT 0")
+        else:
+            sql = text(f'SELECT * FROM "{table_name}" LIMIT 0')
+        with engine.connect() as conn:
+            df = pd.read_sql(sql, conn)
+        return list(df.columns)
+    except Exception:
+        # Fallback to configured columns
+        return TABLE_CONFIG.get(table_name, {}).get("default_columns", [])
 
 @st.cache_data(show_spinner=False)
 def get_distinct_values(table_name: str, column_name: str, limit: int = 200):
     engine = get_engine()
-    if table_name in JOIN_VIEWS:
-        sql = text(f'''
-            SELECT DISTINCT "{column_name}"
-            FROM ({JOIN_VIEWS[table_name]}) q
-            WHERE "{column_name}" IS NOT NULL
-            ORDER BY 1
-            LIMIT {limit}
-        ''')
-    else:
-        sql = text(f'''
-            SELECT DISTINCT "{column_name}"
-            FROM "{table_name}"
-            WHERE "{column_name}" IS NOT NULL
-            ORDER BY 1
-            LIMIT {limit}
-        ''')
-    with engine.connect() as conn:
-        result = conn.execute(sql).fetchall()
-    return [r[0] for r in result]
+    if engine is None:
+        return []
+    
+    try:
+        if table_name in JOIN_VIEWS:
+            sql = text(f'''
+                SELECT DISTINCT "{column_name}"
+                FROM ({JOIN_VIEWS[table_name]}) q
+                WHERE "{column_name}" IS NOT NULL
+                ORDER BY 1
+                LIMIT {limit}
+            ''')
+        else:
+            sql = text(f'''
+                SELECT DISTINCT "{column_name}"
+                FROM "{table_name}"
+                WHERE "{column_name}" IS NOT NULL
+                ORDER BY 1
+                LIMIT {limit}
+            ''')
+        with engine.connect() as conn:
+            result = conn.execute(sql).fetchall()
+        return [r[0] for r in result]
+    except Exception:
+        return []
 
 
 def build_query(table_name: str, selected_columns: List[str], filters: dict, row_limit: int):
@@ -336,40 +358,44 @@ for i, column_name in enumerate(filterable_columns):
 run_query = st.button("Run Query", type="primary")
 
 if run_query:
-    try:
-        sql, params = build_query(data_source, selected_columns, filters, row_limit)
-        with get_engine().connect() as conn:
-            result_df = pd.read_sql(sql, conn, params=params)
+    engine = get_engine()
+    if engine is None:
+        st.error("❌ Cannot run query: Database not connected. Please wait for the ETL pipeline to complete and refresh the page.")
+    else:
+        try:
+            sql, params = build_query(data_source, selected_columns, filters, row_limit)
+            with engine.connect() as conn:
+                result_df = pd.read_sql(sql, conn, params=params)
 
-        st.success(f"Query returned {len(result_df)} rows.")
-        st.dataframe(result_df, use_container_width=True, height=500)
+            st.success(f"Query returned {len(result_df)} rows.")
+            st.dataframe(result_df, use_container_width=True, height=500)
 
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                label="Download CSV",
-                data=result_df.to_csv(index=False).encode("utf-8"),
-                file_name=f"{data_source}_query_results.csv",
-                mime="text/csv",
-            )
-        with c2:
-            st.download_button(
-                label="Download Excel",
-                data=dataframe_to_excel_bytes(result_df),
-                file_name=f"{data_source}_query_results.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
-        with c3:
-            full_sql_preview = str(sql)
-            st.download_button(
-                label="Download SQL",
-                data=full_sql_preview.encode("utf-8"),
-                file_name=f"{data_source}_query.sql",
-                mime="text/plain",
-            )
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.download_button(
+                    label="Download CSV",
+                    data=result_df.to_csv(index=False).encode("utf-8"),
+                    file_name=f"{data_source}_query_results.csv",
+                    mime="text/csv",
+                )
+            with c2:
+                st.download_button(
+                    label="Download Excel",
+                    data=dataframe_to_excel_bytes(result_df),
+                    file_name=f"{data_source}_query_results.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            with c3:
+                full_sql_preview = str(sql)
+                st.download_button(
+                    label="Download SQL",
+                    data=full_sql_preview.encode("utf-8"),
+                    file_name=f"{data_source}_query.sql",
+                    mime="text/plain",
+                )
 
-    except Exception as e:
-        st.error(f"Query failed: {e}")
+        except Exception as e:
+            st.error(f"Query failed: {e}")
 
 st.markdown("---")
 # st.subheader("Suggested next improvements")
