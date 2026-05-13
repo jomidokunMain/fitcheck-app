@@ -273,8 +273,8 @@ st.title("FitCheck Query Portal")
 st.caption("Filter FitCheck study data, preview results, and download CSV or Excel files.")
 
 with st.sidebar:
-    st.header("Connection")
-    st.code(DB_URL.replace(DB_URL.split("@")[-1], "***@***") if "@" in DB_URL else DB_URL)
+    # st.header("Connection")
+    # st.code(DB_URL.replace(DB_URL.split("@")[-1], "***@***") if "@" in DB_URL else DB_URL)
     st.header("Query Setup")
     data_source = st.selectbox(
         "Choose data source",
