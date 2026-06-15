@@ -92,6 +92,513 @@ TABLE_CONFIG: Dict[str, Dict[str, List[str]]] = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# CODEBOOK  — variable descriptions and coded value labels from the PDF docs
+# ---------------------------------------------------------------------------
+CODEBOOK: Dict[str, Dict] = {
+    # ── Demographics & Health ────────────────────────────────────────────────
+    "participant_id": {
+        "question": "Participant ID",
+        "type": "Text",
+        "options": None,
+    },
+    "sex_assigned_at_birth": {
+        "question": "Sex Assigned at Birth",
+        "type": "Categorical",
+        "options": {1: "Male", 2: "Female", 3: "Non-binary", 4: "Prefer not to say"},
+    },
+    "ethnicity": {
+        "question": "Ethnicity",
+        "type": "Categorical",
+        "options": {
+            1: "American Indian or Alaska Native",
+            2: "Asian",
+            3: "Black or African American",
+            4: "Hispanic/Latino/Spanish",
+            5: "Middle Eastern or North African",
+            6: "Native Hawaiian or Pacific Islander",
+            7: "White",
+            8: "Other",
+        },
+    },
+    "birthplace_city_state": {
+        "question": "Birthplace (city, state, country)",
+        "type": "Text",
+        "options": None,
+    },
+    "age_years": {
+        "question": "Age",
+        "type": "Numeric",
+        "options": None,
+    },
+    "daily_physical_activity": {
+        "question": "Daily Physical Activity level",
+        "type": "Ordinal",
+        "options": {
+            1: "Mostly sedentary (≤1 h/wk)",
+            2: "Light activity (2–4 h/wk)",
+            3: "Moderate activity (4–6 h/wk)",
+            4: "Vigorous activity (≥6 h/wk)",
+        },
+    },
+    "weekly_desk_hours_time": {
+        "question": "Hours per week spent sitting at a desk",
+        "type": "Ordinal",
+        "options": {1: "Less than 10", 2: "10–20", 3: "21–40", 4: "More than 40"},
+    },
+    "general_health_rating": {
+        "question": "Overall health rating",
+        "type": "Ordinal",
+        "options": {1: "Poor", 2: "Fair", 3: "Good", 4: "Very good", 5: "Excellent"},
+    },
+    "work_before_break_time": {
+        "question": "Work duration before a break of at least 5 minutes",
+        "type": "Ordinal",
+        "options": {
+            1: "30 min or less",
+            2: "31–60 min",
+            3: "61–90 min",
+            4: "91–120 min",
+            5: "More than 120 min",
+        },
+    },
+    "ergonomic_familiarity": {
+        "question": "Familiarity with ergonomic seating principles",
+        "type": "Ordinal",
+        "options": {
+            1: "Not at all familiar",
+            2: "Slightly familiar",
+            3: "Moderately familiar",
+            4: "Very familiar",
+            5: "Extremely familiar",
+        },
+    },
+    "recurring_chronic_pain": {
+        "question": "Do you have recurring chronic pain?",
+        "type": "Binary",
+        "options": {1: "Yes", 0: "No"},
+    },
+    "pain_location": {
+        "question": "If yes, where is the pain located?",
+        "type": "Text",
+        "options": None,
+    },
+    "posture_most_used": {
+        "question": "Which posture do you most frequently use during desk work?",
+        "type": "Categorical",
+        "options": {
+            1: "Upright", 2: "Perched", 3: "Recline", 4: "Leg(s) propped",
+            5: "Lotus", 6: "Feet Up to the Side", 7: "Leg over Foot", 8: "Legs Crossed",
+            9: "Knee Up", 10: "Both Knees Up", 11: "Side Sitting", 12: "Kneeling",
+        },
+    },
+    "posture_switch_to": {
+        "question": "Which other posture do you use occasionally?",
+        "type": "Categorical",
+        "options": {
+            1: "Upright", 2: "Perched", 3: "Recline", 4: "Leg(s) propped",
+            5: "Lotus", 6: "Feet Up to the Side", 7: "Leg over Foot", 8: "Legs Crossed",
+            9: "Knee Up", 10: "Both Knees Up", 11: "Side Sitting", 12: "Kneeling",
+        },
+    },
+    "posture_change_frequency": {
+        "question": "During a typical 1-hour session, how often do posture changes occur?",
+        "type": "Ordinal",
+        "options": {
+            1: "Rarely (0–1 times)",
+            2: "Occasionally (2–3 times)",
+            3: "Frequently (4–6 times)",
+            4: "Very frequently (7+ times)",
+        },
+    },
+    "seat_continuously_change_freq": {
+        "question": "How long do you sit continuously before changing posture or standing?",
+        "type": "Ordinal",
+        "options": {
+            1: "30 min or less",
+            2: "31–60 min",
+            3: "61–90 min",
+            4: "91–120 min",
+            5: "More than 120 min",
+        },
+    },
+    **{f"posture_list_familarity_{i}": {
+        "question": f"Frequency of using posture {i}",
+        "type": "Ordinal",
+        "options": {1: "Never", 2: "Sometimes", 3: "Often"},
+    } for i in range(1, 13)},
+    **{f"hypermobility_matrix_{i}": {
+        "question": [
+            "Can you place your hands flat on the floor without bending your knees?",
+            "Can you bend your thumb to touch your forearm?",
+            "As a child, did you amuse others by contorting your body / doing the splits?",
+            "As a child/teenager, did your kneecap or shoulder dislocate on more than one occasion?",
+            "Do you consider yourself double-jointed?",
+        ][i - 1],
+        "type": "Binary",
+        "options": {1: "Yes", 0: "No"},
+    } for i in range(1, 6)},
+    # ── Pre-Selection ────────────────────────────────────────────────────────
+    **{f"pre_chair_familiarity_check_{i}": {
+        "question": f"Familiarity with chair C{i:02d}",
+        "type": "Ordinal",
+        "options": {
+            1: "Never seen before",
+            2: "Seen but never used",
+            3: "Used briefly",
+            4: "Used regularly",
+        },
+    } for i in range(1, 12)},
+    "pre_selected_chair_code": {
+        "question": "Initial chair choice (before trials)",
+        "type": "Categorical",
+        "options": {i: f"C{i:02d}" for i in range(1, 12)},
+    },
+    **{f"pre_selection_basis_{i}": {
+        "question": "Reason for initial chair selection — " + [
+            "It looks the most comfortable",
+            "It appears to provide the best back support",
+            "The seat cushion looks comfortable",
+            "The chair design looks ergonomic",
+            "The chair looks adjustable or flexible",
+            "The chair appears to fit my body posture",
+            "The chair looks high quality or well-built",
+            "I like the visual design or aesthetics",
+            "I have sat in it before today",
+            "Other (please specify)",
+        ][i - 1],
+        "type": "Binary",
+        "options": {1: "Selected", 0: "Not selected"},
+    } for i in range(1, 11)},
+    "pre_selection_basis": {
+        "question": "Other basis for initial selection (open text)",
+        "type": "Text",
+        "options": None,
+    },
+    "pre_selection_confidence_3_3": {
+        "question": "Confidence in initial chair selection",
+        "type": "Ordinal",
+        "options": {
+            -3: "Very unconfident", -2: "Moderately unconfident", -1: "Slightly unconfident",
+            0: "Neutral",
+            1: "Slightly confident", 2: "Moderately confident", 3: "Very confident",
+        },
+    },
+    # ── Post-Selection ───────────────────────────────────────────────────────
+    "post_selected_chair_code": {
+        "question": "Best overall chair after testing all chairs",
+        "type": "Categorical",
+        "options": {i: f"C{i:02d}" for i in range(1, 12)},
+    },
+    **{f"post_selection_basis_{i}": {
+        "question": "Reason for final chair selection — " + [
+            "It looks the most comfortable",
+            "It appears to provide the best back support",
+            "The seat cushion looks comfortable",
+            "The chair design looks ergonomic",
+            "The chair looks adjustable or flexible",
+            "The chair appears to fit my body posture",
+            "The chair looks high quality or well-built",
+            "I like the visual design or aesthetics",
+            "I have sat in it before today",
+            "Other (please specify)",
+        ][i - 1],
+        "type": "Binary",
+        "options": {1: "Selected", 0: "Not selected"},
+    } for i in range(1, 11)},
+    "post_selection_basis": {
+        "question": "Other basis for final selection (open text)",
+        "type": "Text",
+        "options": None,
+    },
+    "post_selection_confidence_3_3": {
+        "question": "Confidence in final chair selection",
+        "type": "Ordinal",
+        "options": {
+            -3: "Very unconfident", -2: "Moderately unconfident", -1: "Slightly unconfident",
+            0: "Neutral",
+            1: "Slightly confident", 2: "Moderately confident", 3: "Very confident",
+        },
+    },
+    "selection_changed": {
+        "question": "Did your preferred chair change from pre- to post-selection?",
+        "type": "Binary",
+        "options": {0: "No", 1: "Yes"},
+    },
+    "selection_change_reason": {
+        "question": "What most influenced the change in preference?",
+        "type": "Categorical",
+        "options": {
+            1: "Actual sitting comfort",
+            2: "Better fit after adjustment",
+            3: "Back support",
+            4: "Seat comfort over time",
+            5: "Pressure/discomfort",
+            6: "Ease of adjustment",
+            7: "Other",
+        },
+    },
+    # ── Chair Trials — metadata ───────────────────────────────────────────────
+    "headrest_dependency": {
+        "question": "Chair has a headrest",
+        "type": "Binary",
+        "options": {1: "True", 0: "False"},
+    },
+    "headrest_dependency_user": {
+        "question": "Did you use the headrest?",
+        "type": "Binary",
+        "options": {1: "Yes", 0: "No"},
+    },
+    "interfere": {
+        "question": "Do any features make it harder to sit comfortably, maintain posture, or move naturally?",
+        "type": "Binary",
+        "options": {1: "Yes", 0: "No"},
+    },
+    "interfere_location_selected_choice": {
+        "question": "Interference location / features",
+        "type": "Categorical",
+        "options": {
+            1: "Seat edge / frame",
+            2: "Armrest Support",
+            3: "Recline Motion",
+            4: "Lumbar Area",
+            5: "Headrest",
+            6: "Others",
+        },
+    },
+    "interfere_severity": {
+        "question": "Severity of physical interference",
+        "type": "Ordinal",
+        "options": {1: "Mild", 2: "Moderate", 3: "Severe"},
+    },
+    # ── Chair Trials — fit scales (-3 to +3) ─────────────────────────────────
+    "elbow_fit": {
+        "question": "Armrest height after adjustment",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too low", -2: "Moderately too low", -1: "Slightly too low",
+            0: "About right",
+            1: "Slightly too high", 2: "Moderately too high", 3: "Much too high",
+        },
+    },
+    "seat_depth_fit": {
+        "question": "Seat depth after adjustment",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too shallow", -2: "Moderately too shallow", -1: "Slightly too shallow",
+            0: "About right",
+            1: "Slightly too deep", 2: "Moderately too deep", 3: "Much too deep",
+        },
+    },
+    "seat_width_fit": {
+        "question": "Seat width",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too narrow", -2: "Moderately too narrow", -1: "Slightly too narrow",
+            0: "About right",
+            1: "Slightly too wide", 2: "Moderately too wide", 3: "Much too wide",
+        },
+    },
+    "seat_height_fit": {
+        "question": "Seat height after adjustment",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too low", -2: "Moderately too low", -1: "Slightly too low",
+            0: "About right",
+            1: "Slightly too high", 2: "Moderately too high", 3: "Much too high",
+        },
+    },
+    "backrest_width_fit": {
+        "question": "Backrest width",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too narrow", -2: "Moderately too narrow", -1: "Slightly too narrow",
+            0: "About right",
+            1: "Slightly too wide", 2: "Moderately too wide", 3: "Much too wide",
+        },
+    },
+    "backrest_height_fit": {
+        "question": "Backrest height",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too low", -2: "Moderately too low", -1: "Slightly too low",
+            0: "About right",
+            1: "Slightly too high", 2: "Moderately too high", 3: "Much too high",
+        },
+    },
+    "headrest_height_fit": {
+        "question": "Headrest height",
+        "type": "Ordinal",
+        "options": {
+            -3: "Much too low", -2: "Moderately too low", -1: "Slightly too low",
+            0: "About right",
+            1: "Slightly too high", 2: "Moderately too high", 3: "Much too high",
+        },
+    },
+    "made_for_me_fit": {
+        "question": "Do you feel this chair is made for you?",
+        "type": "Ordinal",
+        "options": {
+            -3: "Strongly disagree", -2: "Moderately disagree", -1: "Slightly disagree",
+            0: "Neutral",
+            1: "Slightly agree", 2: "Moderately agree", 3: "Strongly agree",
+        },
+    },
+    **{f"geometric_fit_{i}": {
+        "question": [
+            "The armrests provide good support",
+            "The seat feels comfortable",
+            "The chair feels comfortable when I first sit down",
+            "The chair seat height fits me",
+            "Backrest width fits you",
+            "Backrest height fits you",
+            "Headrest height fits you",
+        ][i - 1],
+        "type": "Ordinal",
+        "options": {
+            -3: "Strongly disagree", -2: "Moderately disagree", -1: "Slightly disagree",
+            0: "Neutral",
+            1: "Slightly agree", 2: "Moderately agree", 3: "Strongly agree",
+        },
+    } for i in range(1, 8)},
+    # ── Chair Trials — comfort scales ─────────────────────────────────────────
+    "discomfort_seat_3_3": {
+        "question": "Seat comfort / discomfort rating",
+        "type": "Ordinal",
+        "options": {
+            -3: "Extremely uncomfortable", -2: "Very uncomfortable", -1: "Slightly uncomfortable",
+            0: "Neutral",
+            1: "Slightly comfortable", 2: "Very comfortable", 3: "Extremely comfortable",
+        },
+    },
+    "discomfort_back_3_3": {
+        "question": "Back support comfort / discomfort rating",
+        "type": "Ordinal",
+        "options": {
+            -3: "Extremely uncomfortable", -2: "Very uncomfortable", -1: "Slightly uncomfortable",
+            0: "Neutral",
+            1: "Slightly comfortable", 2: "Very comfortable", 3: "Extremely comfortable",
+        },
+    },
+    "overall_comfort_3_3": {
+        "question": "Overall comfort / discomfort rating",
+        "type": "Ordinal",
+        "options": {
+            -3: "Extremely uncomfortable", -2: "Very uncomfortable", -1: "Slightly uncomfortable",
+            0: "Neutral",
+            1: "Slightly comfortable", 2: "Very comfortable", 3: "Extremely comfortable",
+        },
+    },
+    "chair_aesthetics_1": {
+        "question": "How attractive do you find this chair?",
+        "type": "Ordinal",
+        "options": {-3: "Very unattractive", 0: "Average", 3: "Very attractive"},
+    },
+    "chair_aesthetics_2": {
+        "question": "Overall, how much do you like this chair?",
+        "type": "Ordinal",
+        "options": {-3: "Dislike very much", 0: "Neutral", 3: "Like very much"},
+    },
+    "chair_aesthetics_30": {
+        "question": "Overall, how comfortable do you find this chair?",
+        "type": "Ordinal",
+        "options": {-3: "Extremely uncomfortable", 0: "Neither comfortable nor uncomfortable", 3: "Extremely comfortable"},
+    },
+    "expected_vs_experienced_seat_3_3": {
+        "question": "Compared to initial impression — seat comfort",
+        "type": "Ordinal",
+        "options": {-3: "Much worse than expected", 0: "About as expected", 3: "Much better than expected"},
+    },
+    "expected_vs_experienced_back_3_3": {
+        "question": "Compared to initial impression — back support",
+        "type": "Ordinal",
+        "options": {-3: "Much worse than expected", 0: "About as expected", 3: "Much better than expected"},
+    },
+    "expected_vs_experienced_overall_3_3": {
+        "question": "Compared to initial impression — overall comfort",
+        "type": "Ordinal",
+        "options": {-3: "Much worse than expected", 0: "About as expected", 3: "Much better than expected"},
+    },
+    "prolonged_willingness_3_3": {
+        "question": "Would you be willing to use this chair for extended periods?",
+        "type": "Categorical",
+        "options": {0: "No", 1: "Yes", 2: "Unsure"},
+    },
+    # ── Chair Trials — improvement suggestions ────────────────────────────────
+    **{f"improve_suggestion_{i}": {
+        "question": "What could be improved about this chair? — " + [
+            "Fit issue",
+            "Physical interference",
+            "Lack of support",
+            "Adjustment limitation",
+            "Material comfort issue",
+            "Other",
+            "None",
+        ][i - 1],
+        "type": "Binary",
+        "options": {1: "Selected", 0: "Not selected"},
+    } for i in range(1, 8)},
+    **{f"improve_suggestion_loc_{i}": {
+        "question": "Control/mechanism improvement — " + [
+            "Ease of adjusting controls",
+            "Reachability of controls",
+            "Recline smoothness",
+            "Stability during recline",
+            "Other",
+            "None",
+        ][i - 1],
+        "type": "Binary",
+        "options": {1: "Selected", 0: "Not selected"},
+    } for i in range(1, 7)},
+}
+
+# Which variables belong to which table (for codebook filtering)
+_CODEBOOK_TABLE_MAP: Dict[str, List[str]] = {
+    "demographics_health": [
+        "participant_id", "sex_assigned_at_birth", "ethnicity", "birthplace_city_state",
+        "age_years", "daily_physical_activity", "weekly_desk_hours_time", "general_health_rating",
+        "work_before_break_time", "ergonomic_familiarity", "recurring_chronic_pain", "pain_location",
+        "posture_most_used", "posture_switch_to", "posture_change_frequency", "seat_continuously_change_freq",
+        *[f"posture_list_familarity_{i}" for i in range(1, 13)],
+        *[f"hypermobility_matrix_{i}" for i in range(1, 6)],
+    ],
+    "anthropometry": ["participant_id"],
+    "chair_selection_pre": [
+        "participant_id",
+        *[f"pre_chair_familiarity_check_{i}" for i in range(1, 12)],
+        "pre_selected_chair_code",
+        *[f"pre_selection_basis_{i}" for i in range(1, 11)],
+        "pre_selection_basis", "pre_selection_confidence_3_3",
+    ],
+    "chair_selection_post": [
+        "participant_id",
+        "post_selected_chair_code",
+        *[f"post_selection_basis_{i}" for i in range(1, 11)],
+        "post_selection_basis", "post_selection_confidence_3_3",
+        "selection_changed", "selection_change_reason",
+    ],
+    "chair_trials": [
+        "participant_id", "headrest_dependency", "headrest_dependency_user",
+        "interfere", "interfere_location_selected_choice", "interfere_severity",
+        "elbow_fit", "seat_depth_fit", "seat_width_fit", "seat_height_fit",
+        "backrest_width_fit", "backrest_height_fit", "headrest_height_fit", "made_for_me_fit",
+        *[f"geometric_fit_{i}" for i in range(1, 8)],
+        "discomfort_seat_3_3", "discomfort_back_3_3", "overall_comfort_3_3",
+        "chair_aesthetics_1", "chair_aesthetics_2", "chair_aesthetics_30",
+        "expected_vs_experienced_seat_3_3", "expected_vs_experienced_back_3_3",
+        "expected_vs_experienced_overall_3_3", "prolonged_willingness_3_3",
+        *[f"improve_suggestion_{i}" for i in range(1, 8)],
+        *[f"improve_suggestion_loc_{i}" for i in range(1, 7)],
+    ],
+}
+# Join views inherit from their base tables
+_CODEBOOK_TABLE_MAP["participant_overview"] = (
+    _CODEBOOK_TABLE_MAP["demographics_health"]
+    + _CODEBOOK_TABLE_MAP["chair_selection_pre"]
+    + _CODEBOOK_TABLE_MAP["chair_selection_post"]
+)
+_CODEBOOK_TABLE_MAP["chair_trials_analysis"] = _CODEBOOK_TABLE_MAP["chair_trials"]
+
 JOIN_VIEWS = {
     "chair_trials_analysis": """
         SELECT
@@ -325,6 +832,28 @@ with st.sidebar:
             f"Expected at: `{CLEANED_EXPORT_PATH}`\n\n"
             "Run the ETL pipeline to generate it."
         )
+
+    st.divider()
+    with st.expander("📖 Variable Codebook", expanded=False):
+        _cb_vars = _CODEBOOK_TABLE_MAP.get(data_source, list(CODEBOOK.keys()))
+        _cb_vars_in_table = [v for v in _cb_vars if v in CODEBOOK]
+        if not _cb_vars_in_table:
+            st.caption("No coded variables for this data source.")
+        else:
+            for var in _cb_vars_in_table:
+                entry = CODEBOOK[var]
+                st.markdown(f"**`{var}`** — *{entry['question']}*")
+                if entry["options"]:
+                    rows = [{"Code": k, "Label": v} for k, v in entry["options"].items()]
+                    st.dataframe(
+                        pd.DataFrame(rows),
+                        hide_index=True,
+                        use_container_width=True,
+                        height=min(35 * len(rows) + 38, 250),
+                    )
+                else:
+                    st.caption(f"  Type: {entry['type']} (no coded values)")
+                st.markdown("---")
 
 st.subheader("Filters")
 filterable_columns = TABLE_CONFIG.get(data_source, {}).get("filters", all_columns[: min(6, len(all_columns))])
