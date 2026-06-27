@@ -809,7 +809,7 @@ with st.sidebar:
     all_columns = get_columns(data_source)
     default_columns = TABLE_CONFIG.get(data_source, {}).get("default_columns", all_columns[: min(8, len(all_columns))])
     selected_columns = st.multiselect("Columns to include", all_columns, default=default_columns)
-    row_limit = st.number_input("Max rows to return", min_value=10, max_value=100000, value=1000, step=10)
+    row_limit = st.number_input("Max rows to return", min_value=10, max_value=100000, value=990, step=10)
 
     st.divider()
     st.header("Cleaned Export")
