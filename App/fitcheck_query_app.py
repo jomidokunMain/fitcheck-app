@@ -835,11 +835,25 @@ with st.sidebar:
 
     st.divider()
     with st.expander("📖 Variable Codebook", expanded=False):
+        _cb_search = st.text_input(
+            "Search variable name or question",
+            placeholder="e.g. sex, comfort, fit...",
+            key="codebook_search",
+        )
         _cb_vars = _CODEBOOK_TABLE_MAP.get(data_source, list(CODEBOOK.keys()))
         _cb_vars_in_table = [v for v in _cb_vars if v in CODEBOOK]
+
+        if _cb_search.strip():
+            _q = _cb_search.strip().lower()
+            _cb_vars_in_table = [
+                v for v in _cb_vars_in_table
+                if _q in v.lower() or _q in CODEBOOK[v]["question"].lower()
+            ]
+
         if not _cb_vars_in_table:
-            st.caption("No coded variables for this data source.")
+            st.caption("No matching variables found." if _cb_search.strip() else "No coded variables for this data source.")
         else:
+            st.caption(f"{len(_cb_vars_in_table)} variable(s) shown")
             for var in _cb_vars_in_table:
                 entry = CODEBOOK[var]
                 st.markdown(f"**`{var}`** — *{entry['question']}*")
